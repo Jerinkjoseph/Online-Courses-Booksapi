@@ -1,0 +1,45 @@
+[
+    {
+      "id": 1,
+      "title": "Introduction to Web Development",
+      "description": "Learn the basics of HTML, CSS, and JavaScript.",
+      "duration": "4 weeks",
+      "price": 100
+    },
+    {
+      "id": 2,
+      "title": "Advanced JavaScript",
+      "description": "Deep dive into JavaScript concepts like closures, promises, and async/await.",
+      "duration": "6 weeks",
+      "price": 200
+    },
+    {
+      "id": 3,
+      "title": "React for Beginners",
+      "description": "Get started with React and learn how to build single-page applications.",
+      "duration": "5 weeks",
+      "price": 150
+    },
+    {
+      "id": 4,
+      "title": "Python for Data Science",
+      "description": "Learn Python and how to apply it to data analysis and machine learning.",
+      "duration": "8 weeks",
+      "price": 250
+    },
+    {
+      "id": 5,
+      "title": "Cybersecurity Essentials",
+      "description": "Understand the fundamentals of cybersecurity and how to protect against cyber threats.",
+      "duration": "6 weeks",
+      "price": 180
+    },
+    {
+      "id": 6,
+      "title": "Blockchain and Cryptocurrency",
+      "description": "Explore the world of blockchain technology and cryptocurrency.",
+      "duration": "7 weeks",
+      "price": 220
+    }
+  ]
+  

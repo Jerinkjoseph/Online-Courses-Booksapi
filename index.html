@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Courses - Google Books API</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            padding: 20px;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+
+        .navbar a:hover {
+            background-color: #575757;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Filter, Sort, and Pagination */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filter, .sort {
+            display: inline-block;
+        }
+
+        .filter label, .sort label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .filter input, .sort select {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .pagination button:disabled {
+            background-color: #ccc;
+        }
+
+        /* Book/Course List */
+        #books {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .book {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            width: 250px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .book:hover {
+            transform: scale(1.05);
+        }
+
+        .book img {
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .book h3 {
+            color: #007bff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .book p {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .book a {
+            display: block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .book a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="register.html">Register</a>
+    </div>
+
+    <h1>Online Courses (Using Google Books API)</h1>
+
+    <!-- Controls for filtering and sorting -->
+    <div class="controls">
+        <div class="filter">
+            <label for="category">Filter by Subject:</label>
+            <input type="text" id="category" placeholder="Enter subject">
+        </div>
+
+        <div class="sort">
+            <label for="sort">Sort by:</label>
+            <select id="sort">
+                <option value="relevance">Relevance</option>
+                <option value="newest">Newest</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Display books -->
+    <div id="books"></div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <button id="prev" disabled>Previous</button>
+        <button id="next">Next</button>
+    </div>
+
+    <script>
+        let books = [];
+        let currentPage = 0;
+        const itemsPerPage = 6;
+        let searchQuery = "programming";
+        let sortBy = "relevance";
+
+        // Function to fetch books from Google Books API
+        function fetchBooks() {
+            const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${searchQuery}&orderBy=${sortBy}&startIndex=${currentPage * itemsPerPage}&maxResults=${itemsPerPage}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    books = data.items || [];
+                    displayBooks();
+                    updatePaginationButtons(data.totalItems);
+                })
+                .catch(error => console.error('Error fetching books:', error));
+        }
+
+        // Function to display books
+        function displayBooks() {
+            const booksContainer = document.getElementById('books');
+            booksContainer.innerHTML = '';
+
+            books.forEach(book => {
+                const bookInfo = book.volumeInfo;
+                const imageLink = bookInfo.imageLinks ? bookInfo.imageLinks.thumbnail : 'https://via.placeholder.com/150'; // Fallback image
+
+                const bookElement = document.createElement('div');
+                bookElement.classList.add('book');
+                bookElement.innerHTML = `
+                    <img src="${imageLink}" alt="${bookInfo.title}">
+                    <h3>${bookInfo.title}</h3>
+                    <p>Author: ${bookInfo.authors ? bookInfo.authors.join(', ') : 'Unknown'}</p>
+                    <p>Published: ${bookInfo.publishedDate || 'N/A'}</p>
+                    <p>Category: ${bookInfo.categories ? bookInfo.categories.join(', ') : 'N/A'}</p>
+                    <p>Price: ${book.saleInfo && book.saleInfo.listPrice ? '$' + book.saleInfo.listPrice.amount : 'Free'}</p>
+                    <a href="${bookInfo.infoLink}" target="_blank">More Info</a>
+                `;
+                booksContainer.appendChild(bookElement);
+            });
+        }
+
+        // Update pagination buttons
+        function updatePaginationButtons(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            document.getElementById('prev').disabled = currentPage === 0;
+            document.getElementById('next').disabled = currentPage >= totalPages - 1;
+        }
+
+        // Event listener for filtering by subject
+        document.getElementById('category').addEventListener('input', (e) => {
+            searchQuery = e.target.value || "programming";
+            currentPage = 0;
+            fetchBooks();
+        });
+
+        // Event listener for sorting
+        document.getElementById('sort').addEventListener('change', (e) => {
+            sortBy = e.target.value;
+            currentPage = 0;
+            fetchBooks();
+        });
+
+        // Pagination controls
+        document.getElementById('prev').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                fetchBooks();
+            }
+        });
+
+        document.getElementById('next').addEventListener('click', () => {
+            currentPage++;
+            fetchBooks();
+        });
+
+        // Initial fetch
+        fetchBooks();
+    </script>
+</body>
+</html>
